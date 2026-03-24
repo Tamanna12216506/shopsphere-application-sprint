@@ -8,9 +8,15 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/**
+ * Handles application-wide exceptions and returns a consistent API error response.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    /// use of HttpServelet for knowing which api cause error
+
+    /**
+     * Handles duplicate email registration attempts.
+     */
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
@@ -22,6 +28,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 
+    /**
+     * Handles not-found errors for missing resources.
+     */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex, HttpServletRequest request) {
             ErrorResponse errorResponse = ErrorResponse.builder()
@@ -33,6 +42,9 @@ public class GlobalExceptionHandler {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
+    /**
+     * Handles login/authentication failures.
+     */
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException ex, HttpServletRequest request) {
          ErrorResponse errorResponse = ErrorResponse.builder()
@@ -43,10 +55,14 @@ public class GlobalExceptionHandler {
                  .build();
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
+
+    /**
+     * Fallback handler for unexpected unhandled exceptions.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex, HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .message("An unexpected error occurred"+ex.getMessage())
+                .message("An unexpected error occurred" + ex.getMessage())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
                 .path(request.getRequestURI())
