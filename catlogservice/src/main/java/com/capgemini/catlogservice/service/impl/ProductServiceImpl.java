@@ -84,4 +84,15 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
 
     }
+
+    public ProductResponse markAsFeatured(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        product.setFeatured(true);
+
+        Product savedProduct = productRepository.save(product);
+
+        return modelMapper.map(savedProduct, ProductResponse.class);
+    }
 }

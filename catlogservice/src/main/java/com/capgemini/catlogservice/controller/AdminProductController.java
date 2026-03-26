@@ -39,7 +39,12 @@ public class AdminProductController {
         productService.deleteProduct(id);
         return new ResponseEntity<>(new ApiResponse<>(200,"Product deleted successfully", null), HttpStatus.OK);
     }
-
+    // for featured
+    @PatchMapping("/products/{id}/featured")
+    public ResponseEntity<ApiResponse<ProductResponse>> markFeatured(@PathVariable Long id) {
+        ProductResponse response = productService.markAsFeatured(id);
+        return ResponseEntity.ok(new ApiResponse<>(200, "Product marked as featured", response));
+    }
     /// category endpoints
 
     /// add new category

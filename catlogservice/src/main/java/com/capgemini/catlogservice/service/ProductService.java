@@ -12,4 +12,6 @@ public interface ProductService {
     ProductResponse updateProduct(Long id, ProductRequest productRequest);
 
     void deleteProduct(Long id);
+
+    ProductResponse markAsFeatured(Long id);
 }
