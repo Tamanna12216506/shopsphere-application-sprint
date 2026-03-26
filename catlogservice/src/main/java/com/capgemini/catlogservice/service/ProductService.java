@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 
 
 public interface ProductService {
-    Page<ProductResponse> getAllProducts();
+    Page<ProductResponse> getAllProducts(String search,Long categoryId,int page,int size,String sortBy,String sortDir);
     ProductResponse getProductById(Long id);
     ProductResponse createProduct(ProductRequest productRequest);
     ProductResponse updateProduct(Long id, ProductRequest productRequest);

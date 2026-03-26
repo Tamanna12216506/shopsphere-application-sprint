@@ -18,6 +18,7 @@ public class JwtUtil {
             getClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
+            System.out.println("Invalid token "+e.getMessage());
             return false;
         }
     }

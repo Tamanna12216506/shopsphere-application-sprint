@@ -35,19 +35,19 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
      */
 
     // Search active products by name (case-insensitive, partial match)
-    Page<Product> findByNameContainingIgnoreCaseAndActiveTrue(String name, Pageable pageable);
+    Page<Product> findByProductNameContainingIgnoreCaseAndIsAvailableTrue(String name, Pageable pageable);
 
     // Filter active products by category
-    Page<Product> findByCategoryIdAndActiveTrue(Long categoryId, Pageable pageable);
+    Page<Product> findByCategoryCategoryIdAndIsAvailableTrue(Long categoryId, Pageable pageable);
 
     // Search active products by name + category together
-    Page<Product> findByNameContainingIgnoreCaseAndCategoryIdAndActiveTrue(
+    Page<Product> findByProductNameContainingIgnoreCaseAndCategoryCategoryIdAndIsAvailableTrue(
             String name, Long categoryId, Pageable pageable);
 
     // Fetch all active products with pagination
-    Page<Product> findByActiveTrue(Pageable pageable);
+    Page<Product> findByIsAvailableTrue(Pageable pageable);
 
     // Fetch featured and active products for homepage display
-    List<Product> findByFeaturedTrueAndActiveTrue();
+    List<Product> findByFeaturedTrueAndIsAvailableTrue();
 
 }

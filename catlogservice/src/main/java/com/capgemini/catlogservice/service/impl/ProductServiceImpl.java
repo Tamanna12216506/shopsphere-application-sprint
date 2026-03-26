@@ -11,9 +11,10 @@ import com.capgemini.catlogservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +25,27 @@ public class ProductServiceImpl implements ProductService {
     private final ModelMapper modelMapper;
 
     @Override
-    public Page<ProductResponse> getAllProducts() {
-        return null;
+    public Page<ProductResponse> getAllProducts(String search, Long categoryId, int page, int size, String sortBy, String sortDir) {
+        //Create Sorting
+        Sort sort = sortDir.equalsIgnoreCase("desc")? Sort.by(sortBy).descending(): Sort.by(sortBy).ascending();
+
+        //create pageable object
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Product> products;
+
+        /// apply filters
+        boolean hasSearch = search != null && !search.isEmpty();
+        boolean hasCategory = categoryId != null;
+        if(hasCategory && hasSearch) {
+            products =productRepository.findByProductNameContainingIgnoreCaseAndCategoryCategoryIdAndIsAvailableTrue(search, categoryId, pageable);
+        }else if(hasCategory) {
+            products = productRepository.findByCategoryCategoryIdAndIsAvailableTrue(categoryId, pageable);
+        }else if(hasSearch) {
+            products = productRepository.findByProductNameContainingIgnoreCaseAndIsAvailableTrue(search, pageable);
+        }else{
+            products = productRepository.findByIsAvailableTrue(pageable);
+        }
+        return products.map(product -> modelMapper.map(product, ProductResponse.class));
     }
 
     @Override
@@ -40,8 +60,8 @@ public class ProductServiceImpl implements ProductService {
         Category category = categoryRepository.findById(productRequest.getCategoryId()).orElseThrow(()->new RuntimeException("Category not found with id: "+productRequest.getCategoryId()));
         product.setCategory(category);
         product.setIsAvailable(true);
-        productRepository.save(product);
-        return modelMapper.map(product, ProductResponse.class);
+        Product savedProduct = productRepository.save(product);
+        return modelMapper.map(savedProduct, ProductResponse.class);
     }
 
     @Override

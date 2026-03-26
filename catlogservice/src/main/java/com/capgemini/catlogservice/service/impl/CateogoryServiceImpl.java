@@ -35,8 +35,8 @@ public class CateogoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponse createCategory(CategoryRequest categoryRequest) {
         Category category = modelMapper.map(categoryRequest,Category.class);
-        categoryRepository.save(category);
-        return modelMapper.map(category,CategoryResponse.class);
+        Category savedCategory = categoryRepository.save(category);
+        return modelMapper.map(savedCategory,CategoryResponse.class);
     }
 
     @Override

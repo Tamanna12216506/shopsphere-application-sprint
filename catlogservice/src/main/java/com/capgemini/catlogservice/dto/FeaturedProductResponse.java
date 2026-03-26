@@ -5,17 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryResponse {
-
-    private Long categoryId;
-    private String categoryName;
-    private String description;
+public class FeaturedProductResponse {
+    // things will be displayed in homepage
+    private Long productId;
+    private String productName;
+    private BigDecimal price;
     private String imageUrl;
-    private LocalDateTime createdAt;
+    private String categoryName;
 }
