@@ -1,12 +1,17 @@
-package com.capgemini.orderservice.client;
+package com.capgemini.orderservice.config;
 
+import com.capgemini.orderservice.dto.OrderStatusUpdateMessage;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.DefaultJackson2JavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class RabbitMQConfig {
@@ -81,7 +86,23 @@ public class RabbitMQConfig {
     // Serialize messages as JSON instead of Java bytes
     @Bean
     public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
+
+        DefaultJackson2JavaTypeMapper typeMapper = new DefaultJackson2JavaTypeMapper();
+        typeMapper.setTrustedPackages(
+                "com.capgemini.orderservice.dto",
+                "com.capgemini.adminservice.dto"
+        );
+
+        Map<String, Class<?>> idClassMapping = new HashMap<>();
+        idClassMapping.put(
+                "com.capgemini.adminservice.dto.OrderStatusUpdateMessage",
+                OrderStatusUpdateMessage.class
+        );
+        typeMapper.setIdClassMapping(idClassMapping);
+
+        converter.setJavaTypeMapper(typeMapper);
+        return converter;
     }
 
     @Bean

@@ -1,6 +1,6 @@
 package com.capgemini.orderservice.messaging.publisher;
 
-import com.capgemini.orderservice.client.RabbitMQConfig;
+import com.capgemini.orderservice.config.RabbitMQConfig;
 import com.capgemini.orderservice.dto.OrderEventMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
