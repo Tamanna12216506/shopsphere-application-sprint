@@ -2,6 +2,7 @@ package com.capgemini.gatewayserver.security;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -15,41 +16,42 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private final JwtUtil jwtUtil;
 
     @PostConstruct
     public void init() {
-        System.out.println("🔥 JwtAuthenticationFilter bean created");
+        log.info("JwtAuthenticationFilter bean created");
     }
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
-        System.out.println("Incoming Request Path: " + path);
+        log.debug("Incoming request path: {}", path);
 
 
         // Public endpoints
         if (isPublicPath(path)) {
-            System.out.println("Public endpoint, skipping auth");
+            log.debug("Public endpoint, skipping auth");
             return chain.filter(exchange);
         }
         // ── STEP 2: Check Authorization header exists ────────────────────────
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        System.out.println("Authorization Header: " + authHeader);
+        log.debug("Authorization header present: {}", authHeader != null);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("❌ Missing or invalid Authorization header");
+            log.warn("Missing or invalid Authorization header");
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
         String token = authHeader.substring(7);
-        System.out.println("Token: " + token);
+        log.debug("Bearer token received");
 
 
         if (!jwtUtil.validateToken(token)) {
-            System.out.println("❌ Token validation failed");
+            log.warn("Token validation failed");
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
@@ -57,7 +59,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String username = jwtUtil.extractUsername(token);
         String role = jwtUtil.extractRole(token);
 
-        // Role-based route checks
+//         Role-based route checks
         if (path.contains("/api/admin") && !"ADMIN".equals(role)) {
             exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
             return exchange.getResponse().setComplete();

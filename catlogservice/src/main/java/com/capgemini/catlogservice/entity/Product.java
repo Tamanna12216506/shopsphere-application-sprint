@@ -45,7 +45,7 @@ public class Product {
     @Column(nullable = false)
     private Boolean isAvailable=true;
 
-    /// whether product is highlighted or not (trnding product)
+    /// whether product is highlighted or not (trending product)
     @Column(nullable = false)
     private boolean featured = false;
 

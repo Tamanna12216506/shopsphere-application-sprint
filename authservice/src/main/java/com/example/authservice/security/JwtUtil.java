@@ -19,27 +19,26 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private long expiration;
 
+    public boolean validateToken(String token) {
+        try{
+            getClaims(token);
+            return true;
+        }catch (JwtException e){
+            return false;
+        }
+    }
 
-//    public boolean validateToken(String token) {
-//        try{
-//            getClaims(token);
-//            return true;
-//        }catch (JwtException e){
-//            return false;
-//        }
-//    }
-//
-//    private Claims getClaims(String token) {
-//        return Jwts.parser().verifyWith(Keys.hmacShaKeyFor(secret.getBytes())).build().parseSignedClaims(token).getPayload();
-//    }
-//
-//    public String extractUsername(String token) {
-//        return getClaims(token).getSubject();
-//    }
-//
-//    public String extractRole(String token) {
-//        return getClaims(token).get("role", String.class);
-//    }
+    private Claims getClaims(String token) {
+        return Jwts.parser().verifyWith(Keys.hmacShaKeyFor(secret.getBytes())).build().parseSignedClaims(token).getPayload();
+    }
+
+    public String extractUsername(String token) {
+        return getClaims(token).getSubject();
+    }
+
+    public String extractRole(String token) {
+        return getClaims(token).get("role", String.class);
+    }
 
     public String generateToken(User savedUser) {
         return Jwts.builder()

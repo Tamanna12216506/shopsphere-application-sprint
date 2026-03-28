@@ -27,7 +27,7 @@ public class AdminProductController {
     }
 
     /// update
-    @PutMapping("/products/id")
+    @PutMapping("/products/{id}")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequest productRequest) {
         ProductResponse productResponse = productService.updateProduct(id, productRequest);
         return new ResponseEntity<>(new ApiResponse<>(200,"Product updated successfully", productResponse), HttpStatus.OK);
@@ -66,5 +66,23 @@ public class AdminProductController {
     public ResponseEntity<ApiResponse<Void>> deleteCategory( @PathVariable Long id) {
         categoryService.deleteCategory(id);
         return new ResponseEntity<>(new ApiResponse<>(200,"Category deleted successfully", null), HttpStatus.OK);
+    }
+
+    // Add to existing AdminProductController
+
+    // PUT /api/catalog/products/{id}/stock/reduce
+// Called internally by Order Service - not by customers
+    @PutMapping("/products/{id}/stock/reduce")
+    public ResponseEntity<String> reduceStock(@PathVariable Long id, @Valid @RequestBody StockUpdateRequest request) {
+        productService.reduceStock(id, request.getQuantity());
+        return ResponseEntity.ok("Stock updated successfully");
+    }
+
+    // PUT /api/catalog/products/{id}/stock/increase
+// Called when order is CANCELLED - return stock back
+    @PutMapping("/products/{id}/stock/increase")
+    public ResponseEntity<String> increaseStock(@PathVariable Long id, @Valid @RequestBody StockUpdateRequest request) {
+        productService.increaseStock(id, request.getQuantity());
+        return ResponseEntity.ok("Stock restored successfully");
     }
 }

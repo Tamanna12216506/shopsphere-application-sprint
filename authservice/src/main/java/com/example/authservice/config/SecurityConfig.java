@@ -1,6 +1,8 @@
 package com.example.authservice.config;
 
+import com.example.authservice.security.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +29,9 @@ public class SecurityConfig {
     @Value("${cors.allowed-origins}")
     private String allowedOrigins;
 
+    @Autowired
+    private JwtAuthFilter jwtAuthFilter;
+
 //    @Bean
 //    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 //        http
@@ -44,16 +49,16 @@ public class SecurityConfig {
 //    }
      @Bean
      public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-             return http
-            .csrf(csrf -> csrf.disable())   // 🔥 DISABLE CSRF
-            .authorizeHttpRequests(auth -> auth
-                    .anyRequest().permitAll()
-            )
-            .build();
-    }
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
+         return http
+                 .csrf(csrf -> csrf.disable())   // 🔥 DISABLE CSRF
+                 .authorizeHttpRequests(auth -> auth
+                         .anyRequest().permitAll()
+                 )
+                 .build();
+     }
+     @Bean
+     public CorsConfigurationSource corsConfigurationSource() {
+         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.addAllowedOrigin(allowedOrigins);
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addAllowedMethod("*");

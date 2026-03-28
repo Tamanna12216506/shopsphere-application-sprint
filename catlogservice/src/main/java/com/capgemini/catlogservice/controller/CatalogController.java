@@ -48,13 +48,26 @@ public class CatalogController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    // Used by adminservice Feign client to fetch all active products in one call.
+    @GetMapping("/products/all")
+    public ResponseEntity<List<ProductResponse>> getAllAvailableProducts() {
+        List<ProductResponse> products = productService.getAllAvailableProducts();
+        return new ResponseEntity<>(products, HttpStatus.OK);
+    }
+
+    @GetMapping("/products/count")
+    public ResponseEntity<Long> getProductCount() {
+        Long productCount = productService.getAvailableProductCount();
+        return new ResponseEntity<>(productCount, HttpStatus.OK);
+    }
+
     /// product detail page
-    @GetMapping("/product/{id}")
-    public ResponseEntity<ApiResponse<ProductResponse>> getProductById(@PathVariable Long id) {
+    @GetMapping("/products/{id}")
+    public ApiResponse<ProductResponse> getProductById(@PathVariable Long id) {
         ProductResponse productResponse = productService.getProductById(id);
 
-        ApiResponse<ProductResponse> response = new ApiResponse<>(200, "Product fetched successfully", productResponse);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ApiResponse<>(200, "Product fetched successfully", productResponse);
+
     }
 
     // for getting all categories
@@ -65,6 +78,12 @@ public class CatalogController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/categories/count")
+    public ResponseEntity<Long> getCategoryCount() {
+        Long categoryCount = categoryService.getCategoryCount();
+        return new ResponseEntity<>(categoryCount, HttpStatus.OK);
+    }
+
 
     //getting category by id
     @GetMapping("/categories/{id}")
@@ -73,5 +92,7 @@ public class CatalogController {
         ApiResponse<CategoryResponse> response = new ApiResponse<>(200, "Category fetched successfully", categoryResponse);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+
 
 }

@@ -47,6 +47,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // Fetch all active products with pagination
     Page<Product> findByIsAvailableTrue(Pageable pageable);
 
+    // Fetch all active products without pagination (for admin dashboard sync)
+    List<Product> findByIsAvailableTrue();
+
+    // Count only active products to match soft-delete behavior
+    Long countByIsAvailableTrue();
+
     // Fetch featured and active products for homepage display
     List<Product> findByFeaturedTrueAndIsAvailableTrue();
 
