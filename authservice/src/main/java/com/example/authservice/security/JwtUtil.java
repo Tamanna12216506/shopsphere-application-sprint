@@ -19,7 +19,6 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private long expiration;
 
-
     public boolean validateToken(String token) {
         try{
             getClaims(token);

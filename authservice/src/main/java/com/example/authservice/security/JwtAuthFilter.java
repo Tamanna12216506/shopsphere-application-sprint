@@ -27,7 +27,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        //for removing bearer
+        // Extract token by removing "Bearer "
         String token = header.substring(7);
 
         if(jwtUtil.validateToken(token)){
@@ -42,11 +42,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     );
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         }
-    filterChain.doFilter(request, response);
-
-
+        filterChain.doFilter(request, response);
     }
-
-
-
 }

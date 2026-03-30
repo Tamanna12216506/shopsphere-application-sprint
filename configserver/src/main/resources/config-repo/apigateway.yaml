@@ -1,0 +1,64 @@
+server:
+  port: 8070
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: lb://AUTHSERVICE
+          predicates:
+            - Path=/api/auth/**
+        - id: catalog-public
+          uri: lb://CATALOGSERVICE
+          predicates:
+            - Path=/api/catalog/**
+        - id: catalog-admin
+          uri: lb://CATALOGSERVICE
+          predicates:
+            - Path=/api/admin/catalog/**
+        - id: order-service
+          uri: lb://ORDERSERVICE
+          predicates:
+            - Path=/api/orders/**
+        - id: admin-service
+          uri: lb://ADMINSERVICE
+          predicates:
+            - Path=/api/admin/**
+        - id: payment-service
+          uri: lb://PAYMENTSERVICE
+          predicates:
+            - Path=/api/payment/**
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+jwt:
+  secret: 96775a5fb7f56bd254cf601fea198a1234567890abcd
+  expiration: 86400000
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://frontend:3000}
+
+logging:
+  level:
+    root: INFO
+    com.capgemini.gatewayserver: DEBUG
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://zipkin:9411/api/v2/spans}

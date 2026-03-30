@@ -22,8 +22,7 @@ public class SignupRequest {
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
-//    @NotBlank(message = "Role is required")
-//    private String role;
+
 
 
 }
