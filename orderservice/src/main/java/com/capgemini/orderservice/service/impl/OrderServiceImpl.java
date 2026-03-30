@@ -15,6 +15,8 @@ import com.capgemini.orderservice.messaging.publisher.OrderEventPublisher;
 import com.capgemini.orderservice.repository.CartRepository;
 import com.capgemini.orderservice.repository.OrderRepository;
 import com.capgemini.orderservice.service.OrderService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -42,6 +44,10 @@ public class OrderServiceImpl implements OrderService {
     private final OrderEventPublisher orderEventPublisher;
 
     //-- checkout converts user's cart into order, saves address and payment mode, and creates final order
+    // Opens the circuit if checkout keeps hitting failing downstream services.
+    @CircuitBreaker(name = "paymentService", fallbackMethod = "checkoutFallback")
+    // Retries brief downstream issues before failing checkout.
+    @Retry(name = "paymentService")
     @Override
     @Caching(evict = {@CacheEvict(value = "myOrders", key = "#userId"), @CacheEvict(value = "allOrders", key = "'all'"),
             @CacheEvict(value = "orderById", allEntries = true), @CacheEvict(value = "adminOrderById", allEntries = true)})
@@ -117,6 +123,11 @@ public class OrderServiceImpl implements OrderService {
             log.warn("Checkout failed for orderId={} userId={}", savedOrder.getOrderId(), savedOrder.getUserId());
         }
         return toOrderDTO(orderRepository.save(savedOrder));
+    }
+
+    private OrderDTO checkoutFallback(String userId, CheckoutRequest request, Throwable throwable) {
+        log.error("Checkout fallback triggered for userId={}: {}", userId, throwable.getMessage());
+        throw new BadRequestException("Checkout is temporarily unavailable");
     }
 
     private PaymentResponse processPayment(Order savedOrder,PaymentMode paymentMode) {
@@ -195,6 +206,10 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
     }
 
+    // Opens the circuit if cancellation keeps hitting failing downstream services.
+    @CircuitBreaker(name = "catalogService", fallbackMethod = "cancelOrderFallback")
+    // Retries brief downstream issues before failing cancellation.
+    @Retry(name = "catalogService")
     @Override
     @Caching(evict = {@CacheEvict(value = "myOrders", key = "#userId"), @CacheEvict(value = "allOrders", key = "'all'"),
             @CacheEvict(value = "orderById", allEntries = true), @CacheEvict(value = "adminOrderById", allEntries = true)})
@@ -233,6 +248,11 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
         log.info("Order cancelled orderId={} userId={}", order.getOrderId(), order.getUserId());
         return toOrderDTO(order);
+    }
+
+    private OrderDTO cancelOrderFallback(String userId, Long orderId, Throwable throwable) {
+        log.error("Cancel order fallback triggered for orderId={}: {}", orderId, throwable.getMessage());
+        throw new BadRequestException("Order cancellation is temporarily unavailable");
     }
 
     private void restoreStockForOrderItems(List<OrderItem> items) {

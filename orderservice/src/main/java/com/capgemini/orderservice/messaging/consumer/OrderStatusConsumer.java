@@ -18,8 +18,7 @@ public class OrderStatusConsumer {
 
     // Listens to status update messages published by Admin Service
     @RabbitListener(queues = RabbitMQConfig.ORDER_STATUS_UPDATE_QUEUE)
-    public void consumeOrderStatusUpdate(
-            OrderStatusUpdateMessage message) {
+    public void consumeOrderStatusUpdate(OrderStatusUpdateMessage message) {
 
         log.info("Received status update for orderId: {} → {}",
                 message.getOrderId(), message.getStatus());

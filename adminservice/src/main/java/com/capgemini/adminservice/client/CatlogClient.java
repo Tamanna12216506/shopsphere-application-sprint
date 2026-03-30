@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
-@FeignClient(name = "CATLOGSERVICE")
+@FeignClient(name = "CATALOGSERVICE")
 public interface CatlogClient {
 
     // Get all products

@@ -17,11 +17,8 @@ public class StockEventPublisher {
 
     private final RabbitTemplate rabbitTemplate;
 
-    public void publishLowStockAlert(Long productId,
-                                     String productName,
-                                     Integer currentStock) {
-        log.warn("LOW STOCK ALERT - Product: {} | Stock: {}",
-                productName, currentStock);
+    public void publishLowStockAlert(Long productId, String productName, Integer currentStock) {
+        log.warn("LOW STOCK ALERT - Product: {} | Stock: {}", productName, currentStock);
 
         LowStockMessage message = LowStockMessage.builder()
                 .productId(productId)

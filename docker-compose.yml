@@ -1,0 +1,243 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  zipkin:
+    image: openzipkin/zipkin:3
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+
+  sonarqube-db:
+    image: postgres:16-alpine
+    container_name: sonarqube-db
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonarqube
+    ports:
+      - "5433:5432"
+    volumes:
+      - sonarqube-db-data:/var/lib/postgresql/data
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    depends_on:
+      - sonarqube-db
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonarqube
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
+
+  config-server:
+    build:
+      context: ./configserver
+      dockerfile: Dockerfile
+    container_name: config-server
+    restart: on-failure
+    depends_on:
+      - mysql
+      - rabbitmq
+      - redis
+      - zipkin
+    environment:
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
+    ports:
+      - "8888:8888"
+
+  eureka-server:
+    build:
+      context: ./eurekaserver
+      dockerfile: Dockerfile
+    container_name: eureka-server
+    restart: on-failure
+    depends_on:
+      - config-server
+    ports:
+      - "8761:8761"
+
+  authservice:
+    build:
+      context: ./authservice
+      dockerfile: Dockerfile
+    container_name: authservice
+    restart: on-failure
+    depends_on:
+      - config-server
+      - eureka-server
+      - mysql
+      - rabbitmq
+      - redis
+      - zipkin
+    env_file:
+      - .env
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
+      DB_URL: jdbc:mysql://mysql:3306/authservice?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+      RABBITMQ_HOST: rabbitmq
+      REDIS_HOST: redis
+    ports:
+      - "8084:8084"
+
+  orderservice:
+    build:
+      context: ./orderservice
+      dockerfile: Dockerfile
+    container_name: orderservice
+    restart: on-failure
+    depends_on:
+      - config-server
+      - eureka-server
+      - mysql
+      - rabbitmq
+      - redis
+      - zipkin
+      - paymentservice
+      - catalogservice
+    env_file:
+      - .env
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
+      DB_URL: jdbc:mysql://mysql:3306/orderdb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+      RABBITMQ_HOST: rabbitmq
+      REDIS_HOST: redis
+    ports:
+      - "8082:8082"
+
+  catalogservice:
+    build:
+      context: ./catlogservice
+      dockerfile: Dockerfile
+    container_name: catalogservice
+    restart: on-failure
+    depends_on:
+      - config-server
+      - eureka-server
+      - mysql
+      - rabbitmq
+      - redis
+      - zipkin
+    env_file:
+      - .env
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
+      DB_URL: jdbc:mysql://mysql:3306/catlogdb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+      RABBITMQ_HOST: rabbitmq
+      REDIS_HOST: redis
+    ports:
+      - "8081:8081"
+
+  apigateway:
+    build:
+      context: ./GatewayServer
+      dockerfile: Dockerfile
+    container_name: apigateway
+    restart: on-failure
+    depends_on:
+      - config-server
+      - eureka-server
+      - authservice
+      - orderservice
+      - catalogservice
+      - adminservice
+      - paymentservice
+      - zipkin
+    env_file:
+      - .env
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
+      ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+    ports:
+      - "8070:8070"
+
+  adminservice:
+    build:
+      context: ./adminservice
+      dockerfile: Dockerfile
+    container_name: adminservice
+    restart: on-failure
+    depends_on:
+      - config-server
+      - eureka-server
+      - rabbitmq
+      - zipkin
+    env_file:
+      - .env
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
+      ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+      RABBITMQ_HOST: rabbitmq
+    ports:
+      - "8083:8083"
+
+  paymentservice:
+    build:
+      context: ./paymentservice
+      dockerfile: Dockerfile
+    container_name: paymentservice
+    restart: on-failure
+    depends_on:
+      - config-server
+      - eureka-server
+      - mysql
+      - zipkin
+    env_file:
+      - .env
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
+      DB_URL: jdbc:mysql://mysql:3306/paymentdb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+    ports:
+      - "8085:8085"
+
+volumes:
+  mysql-data:
+  sonarqube-db-data:
+  sonarqube-data:
+  sonarqube-extensions:
+  sonarqube-logs:

@@ -38,7 +38,7 @@ public class StripePaymentService {
             params.put("amount", amountInPaise);
             params.put("currency", "inr");
             params.put("payment_method", "pm_card_visa");  // Stripe test card
-            params.put("confirmation_method", "manual");
+            params.put("confirmation_method", "automatic");
             params.put("confirm", true);
             params.put("metadata", Map.of(
                     "order_id", request.getOrderId().toString(),

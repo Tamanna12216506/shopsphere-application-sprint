@@ -6,6 +6,8 @@ import com.capgemini.adminservice.dto.DashboardDTO;
 import com.capgemini.adminservice.dto.OrderDTO;
 import com.capgemini.adminservice.enums.OrderStatus;
 import com.capgemini.adminservice.service.AdminDashboardService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,10 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     private final OrderClient orderClient;
     private final CatlogClient catalogClient;
 
+    // Opens the circuit if dashboard calls keep failing.
+    @CircuitBreaker(name = "adminDashboard", fallbackMethod = "getDashboardFallback")
+    // Retries brief dashboard call issues before failing the request.
+    @Retry(name = "adminDashboard")
     @Override
     public DashboardDTO getDashboard() {
 
@@ -69,6 +75,24 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 .totalProducts(totalProducts)
                 .totalCategories(totalCategories)
                 .lowStockProducts(lowStock)
+                .build();
+    }
+
+    private DashboardDTO getDashboardFallback(Throwable throwable) {
+        log.error("Dashboard fallback triggered: {}", throwable.getMessage());
+        return DashboardDTO.builder()
+                .totalOrders(0L)
+                .pendingOrders(0L)
+                .confirmedOrders(0L)
+                .packedOrders(0L)
+                .shippedOrders(0L)
+                .deliveredOrders(0L)
+                .cancelledOrders(0L)
+                .failedOrders(0L)
+                .totalRevenue(BigDecimal.ZERO)
+                .totalProducts(0L)
+                .totalCategories(0L)
+                .lowStockProducts(0L)
                 .build();
     }
 

@@ -1,7 +1,7 @@
 import java.sql.*;
 public class Q {
   public static void main(String[] a) throws Exception {
-    try (Connection c = DriverManager.getConnection("jdbc:mysql://localhost:3306/orderdb?user=root&password=root");
+        try (Connection c = DriverManager.getConnection("jdbc:mysql://localhost:3307/orderdb?user=root&password=root");
          Statement s = c.createStatement();
          ResultSet r = s.executeQuery("select order_id,user_id,order_status,payment_mode,payment_id,total_amount from orders order by order_id desc limit 10")) {
       while (r.next()) {

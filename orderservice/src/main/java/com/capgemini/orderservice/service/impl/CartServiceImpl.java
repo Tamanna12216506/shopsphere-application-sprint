@@ -9,6 +9,8 @@ import com.capgemini.orderservice.exception.ResourceNotFoundException;
 import com.capgemini.orderservice.repository.CartItemRepository;
 import com.capgemini.orderservice.repository.CartRepository;
 import com.capgemini.orderservice.service.CartService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -33,11 +35,14 @@ public class CartServiceImpl implements CartService {
      * If the product already exists in the cart, its quantity is incremented.
      */
 
+    // Opens the circuit if catalog calls keep failing.
+    @CircuitBreaker(name = "catalogService", fallbackMethod = "addToCartFallback")
+    // Retries brief catalog issues before failing the request.
+    @Retry(name = "catalogService")
     @Override
     public CartDTO addToCart(String userId, AddToCartRequest request) {
         // 1. Fetch product from catalog service
-        ApiResponse<ProductResponse> apiResponse =
-                catalogClient.getProductById(request.getProductId());
+        ApiResponse<ProductResponse> apiResponse = catalogClient.getProductById(request.getProductId());
 
         ProductResponse product = apiResponse.getData();
         if (product == null) {
@@ -120,6 +125,11 @@ public class CartServiceImpl implements CartService {
         return getCart(userId);
         //        // Reusing getCart() to avoid duplicate mapping logic and ensure consistent cart response with correct totals
 
+    }
+
+    private CartDTO addToCartFallback(String userId, AddToCartRequest request, Throwable throwable) {
+        log.error("Catalog fallback triggered while adding to cart for productId={}: {}", request.getProductId(), throwable.getMessage());
+        throw new BadRequestException("Catalog service is temporarily unavailable");
     }
     /**
      * Fetches the user's cart and computes derived values like item subtotal, total items,

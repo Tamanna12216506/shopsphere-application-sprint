@@ -32,25 +32,11 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthFilter jwtAuthFilter;
 
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf(csrf -> csrf.disable())
-//                .cors(cors ->cors.configurationSource(corsConfigurationSource()))
-//                .sessionManagement(session ->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .authorizeHttpRequests(auth -> auth
-//                                .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-//                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-//                                .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
-//                        .anyRequest().authenticated())
-//                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 //
-//        return http.build();
-//    }
      @Bean
      public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
          return http
-                 .csrf(csrf -> csrf.disable())   // 🔥 DISABLE CSRF
+                 .csrf(csrf -> csrf.disable())   //  DISABLE CSRF
                  .authorizeHttpRequests(auth -> auth
                          .anyRequest().permitAll()
                  )

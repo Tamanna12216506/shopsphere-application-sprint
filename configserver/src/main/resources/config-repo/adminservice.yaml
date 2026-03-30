@@ -3,22 +3,52 @@ server:
 
 spring:
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
 
-  zipkin:
-    base-url: http://localhost:9411
-    sender:
-      type: web
-  sleuth:
-    sampler:
-      probability: 1.0
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+
 logging:
   level:
     root: INFO
     com.example.adminservice: DEBUG
-    org.elasticsearch.client: DEBUG
-    org.elasticsearch.transport: TRACE
-    org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate: DEBUG
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://zipkin:9411/api/v2/spans}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      adminDashboard:
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+      orderService:
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+  retry:
+    instances:
+      adminDashboard:
+        maxAttempts: 3
+        waitDuration: 500ms
+      orderService:
+        maxAttempts: 3
+        waitDuration: 500ms

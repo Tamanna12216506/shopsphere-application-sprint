@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "CATLOGSERVICE")
+@FeignClient(name = "CATALOGSERVICE")
 public interface CatalogClient {
     @GetMapping("/api/catalog/products/{id}")
     ApiResponse<ProductResponse> getProductById(@PathVariable Long id);

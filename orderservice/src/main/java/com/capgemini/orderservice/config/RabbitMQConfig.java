@@ -17,23 +17,17 @@ import java.util.Map;
 public class RabbitMQConfig {
 
     // ── Queue Names ───────────────────────────────────────────────────────────
-    public static final String ORDER_STATUS_UPDATE_QUEUE =
-            "order-status-update-queue";
-    public static final String ORDER_CONFIRMED_QUEUE =
-            "order-confirmed-queue";
-    public static final String ORDER_CANCELLED_QUEUE =
-            "order-cancelled-queue";
+    public static final String ORDER_STATUS_UPDATE_QUEUE = "order-status-update-queue";
+    public static final String ORDER_CONFIRMED_QUEUE = "order-confirmed-queue";
+    public static final String ORDER_CANCELLED_QUEUE ="order-cancelled-queue";
 
     // ── Exchange Names ────────────────────────────────────────────────────────
     public static final String ORDER_EXCHANGE = "order.exchange";
 
     // ── Routing Keys ──────────────────────────────────────────────────────────
-    public static final String ORDER_STATUS_UPDATE_ROUTING_KEY =
-            "order.status.update";
-    public static final String ORDER_CONFIRMED_ROUTING_KEY =
-            "order.confirmed";
-    public static final String ORDER_CANCELLED_ROUTING_KEY =
-            "order.cancelled";
+    public static final String ORDER_STATUS_UPDATE_ROUTING_KEY = "order.status.update";
+    public static final String ORDER_CONFIRMED_ROUTING_KEY = "order.confirmed";
+    public static final String ORDER_CANCELLED_ROUTING_KEY = "order.cancelled";
 
     // ── Exchange ──────────────────────────────────────────────────────────────
     @Bean

@@ -12,34 +12,25 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
     // ── Queue Names (must match other services like Order Service) ─────────────
-    public static final String ORDER_STATUS_UPDATE_QUEUE =
-            "order-status-update-queue"; // queue for order status updates
+    public static final String ORDER_STATUS_UPDATE_QUEUE = "order-status-update-queue"; // queue for order status updates
 
-    public static final String ORDER_CONFIRMED_QUEUE =
-            "order-confirmed-queue"; // queue when order is confirmed
+    public static final String ORDER_CONFIRMED_QUEUE = "order-confirmed-queue"; // queue when order is confirmed
 
-    public static final String ORDER_CANCELLED_QUEUE =
-            "order-cancelled-queue"; // queue when order is cancelled
+    public static final String ORDER_CANCELLED_QUEUE = "order-cancelled-queue"; // queue when order is cancelled
 
-    public static final String LOW_STOCK_QUEUE =
-            "low-stock-alert-queue"; // queue for low stock alerts
+    public static final String LOW_STOCK_QUEUE = "low-stock-alert-queue"; // queue for low stock alerts
 
     // ── Exchanges (entry point where messages are sent) ────────────────────────
     public static final String ORDER_EXCHANGE   = "order.exchange"; // for order-related events
     public static final String CATALOG_EXCHANGE = "catalog.exchange"; // for catalog events
 
     // ── Routing Keys (decide which queue gets the message) ─────────────────────
-    public static final String ORDER_STATUS_UPDATE_ROUTING_KEY =
-            "order.status.update";
+    public static final String ORDER_STATUS_UPDATE_ROUTING_KEY = "order.status.update";
 
-    public static final String ORDER_CONFIRMED_ROUTING_KEY =
-            "order.confirmed";
+    public static final String ORDER_CONFIRMED_ROUTING_KEY = "order.confirmed";
+    public static final String ORDER_CANCELLED_ROUTING_KEY = "order.cancelled";
 
-    public static final String ORDER_CANCELLED_ROUTING_KEY =
-            "order.cancelled";
-
-    public static final String LOW_STOCK_ROUTING_KEY =
-            "catalog.stock.low";
+    public static final String LOW_STOCK_ROUTING_KEY = "catalog.stock.low";
 
     // ── Create Exchanges ──────────────────────────────────────────────────────
     @Bean
